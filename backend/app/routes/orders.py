@@ -1,7 +1,7 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from app.services.order_service import OrderService
 
-orders_bp = Blueprint("orders", __name__, url_prefix="/orders")
+orders_bp = Blueprint("orders", __name__, url_prefix="/api/orders")
 
 order_service = OrderService()
 
@@ -9,10 +9,21 @@ order_service = OrderService()
 def create_order():
     try:
         data = request.get_json(silent=True)
-        if isinstance(data.get("items", []), list):
-            order = order_service.create_order(data)
-            return order, 201
-        else:
-            return "Error al crear el pedido", 400
-    except:
-        return "Error al crear el pedido", 400
+        if data is None:
+            return jsonify({"error": "Body vacío o no es JSON"}), 400
+
+        items = data.get("items")
+        total = data.get("total")
+
+        if not items or not isinstance(items, list):
+            return jsonify({"error": "No hay item o no es una lista"}), 400
+        
+        if total is None:
+            return jsonify({"error": "Total inválido"}), 400
+        
+        order = order_service.create_order(data)
+
+        return jsonify(order), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

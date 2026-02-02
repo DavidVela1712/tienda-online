@@ -3,6 +3,9 @@ from app.routes.health import health_bp
 from app.routes.products import products_bp
 from app.routes.orders import orders_bp
 from app.routes.categories import categories_bp
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 def crate_app():
     app = Flask(__name__)
