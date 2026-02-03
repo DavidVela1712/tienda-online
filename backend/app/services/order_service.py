@@ -1,8 +1,8 @@
 from datetime import datetime
 import uuid
-from app import db
+from app.extensions import db
 
-from backend.app.model.order import Order, OrderItem
+from app.model.order import Order, OrderItem
 
 
 class OrderService:

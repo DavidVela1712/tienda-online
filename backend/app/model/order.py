@@ -1,5 +1,5 @@
-import datetime
-from app import db
+from datetime import datetime
+from app.extensions import db
 
 class Order(db.Model):
     __tablename__ = "orders"
@@ -7,7 +7,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer)
     status = db.Column(db.String(20), default="pending")
     total_amount = db.Column(db.Numeric(10, 2))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
 
 class OrderItem(db.Model):
     __tablename__ = "order_items"
