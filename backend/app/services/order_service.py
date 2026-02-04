@@ -15,31 +15,28 @@ class OrderService:
         if isinstance(items, list) and items != []:
             for item in items:
                 if (
-                    item.product_id == None
-                    or item.quantity == None
-                    or item.price == None
+                    item.get("product_id") is None
+                    or item.get("quantity") is None
+                    or item.get("price") is None
                 ):
                     raise ValueError("Valores no esperados")
-                calculated_total += item.quantity * item.price
+                calculated_total += item.get("quantity") * item.get("price")
             if data.get("total") != calculated_total:
                 raise ValueError("Totales distintos")
 
             order = Order(
-                id=str(uuid.uuid4()),
                 user_id=0,
                 status="pending",
-                created_at=datetime.utcnow(),
                 total_amount=calculated_total,
             )
             db.session.add(order)
             order_items_list = []
             for item in items:
                 order_item = OrderItem(
-                    id=str(uuid.uuid4()),
                     order_id=order.id,
-                    product_id=item.product_id,
-                    quantity=item.quantity,
-                    unit_price=item.unit_price,
+                    product_id=item.get("product_id"),
+                    quantity=item.get("quantity"),
+                    unit_price=item.get("unit_price"),
                 )
                 db.session.add(order_item)
                 order_items_list.append(order_item)
