@@ -30,6 +30,7 @@ class OrderService:
                 total_amount=calculated_total,
             )
             db.session.add(order)
+            db.session.flush()
             order_items_list = []
             for item in items:
                 order_item = OrderItem(
@@ -60,4 +61,27 @@ class OrderService:
                     }
                 )
 
+            return order_dict
+        
+    def get_order_by_id(self, order_id):
+        order = Order.query.get(order_id)
+        if not order:
+            raise ValueError("Order no encontrado")
+        else:
+            order_dict = {
+                "id": order.id,
+                "user_id": order.user_id,
+                "status": order.status,
+                "created_at": order.created_at.isoformat(),
+                "total_amount": order.total_amount,
+                "items": [],
+            }
+            for item in order.items:
+                order_dict["items"].append(
+                    {
+                        "product_id": item.product_id,
+                        "quantity": item.quantity,
+                        "unit_price": item.unit_price,
+                    }
+                )
             return order_dict

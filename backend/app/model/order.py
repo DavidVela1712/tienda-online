@@ -9,10 +9,21 @@ class Order(db.Model):
     total_amount = db.Column(db.Float)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    items = db.relationship(
+        "OrderItem",
+        backref = "order",
+        lazy = True,
+        cascade = "all, delete-orphan"
+    )
+
 class OrderItem(db.Model):
     __tablename__ = "order_items"
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer)
+    order_id = db.Column(
+        db.Integer,
+        db.ForeignKey("orders.id"),
+        nullable=False
+    )
     product_id = db.Column(db.Integer)
     quantity = db.Column(db.Integer)
     unit_price = db.Column(db.Float)

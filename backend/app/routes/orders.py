@@ -26,4 +26,12 @@ def create_order():
         return jsonify(order), 201
     
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)}), 404
+    
+@orders_bp.route("/<int:order_id>", methods=["GET"])
+def get_order(order_id):
+    try:
+        order = order_service.get_order_by_id(order_id)
+        return jsonify(order), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 404
