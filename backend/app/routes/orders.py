@@ -35,3 +35,16 @@ def get_order(order_id):
         return jsonify(order), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 404
+    
+@orders_bp.route("/<int:order_id>", methods=["PATCH"])
+def change_order(order_id):
+    try:
+        new_order = request.get_json(silent=True)
+        if new_order is None:
+            return jsonify({"error": "Status vacío o no es JSON"}), 400
+        if not isinstance(new_order.get("status"), str) or new_order.get("status") is None:
+            return jsonify({"error": "Valor de status incorrecto"}), 400
+        order = order_service.change_status(new_order.get("status"), order_id)
+        return jsonify(order), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

@@ -5,9 +5,8 @@ from app.extensions import db
 from app.model.order import Order, OrderItem
 
 
+status_list = ["pending", "paid", "shipped", "cancelled", "closed"]
 class OrderService:
-    def __init__(self):
-        self.orders = []
 
     def create_order(self, data):
         items = data.get("items")
@@ -85,3 +84,21 @@ class OrderService:
                     }
                 )
             return order_dict
+    
+    def change_status(self, new_status, order_id):
+            order = Order.query.get(order_id)
+            if not order:
+                raise ValueError("Pedido no encontrado")
+            else:
+                if new_status not in status_list:
+                    raise ValueError("Status incorrecto")
+                elif order.status == "pending" and (new_status == "paid" or new_status == "cancelled"):
+                    order.status = new_status
+                elif order.status == "paid" and  (new_status == "shipped" or new_status == "cancelled"):
+                    order.status = new_status
+                elif order.status == "shipped" and (new_status == "closed" or new_status == "cancelled"):
+                    order.status = new_status
+                else:
+                    raise ValueError("No se puede modificar ese Status")
+                db.session.commit()
+                return order
