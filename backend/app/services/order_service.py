@@ -84,6 +84,29 @@ class OrderService:
                     }
                 )
             return order_dict
+        
+    def get_orders(self):
+        orders = Order.query.all()
+        orders_list = []
+        for order in orders:
+            order_dict = {
+                "id": order.id,
+                "user_id": order.user_id,
+                "status": order.status,
+                "created_at": order.created_at.isoformat(),
+                "total_amount": order.total_amount,
+                "items": [],
+            }
+            for item in order.items:
+                order_dict["items"].append(
+                    {
+                        "product_id": item.product_id,
+                        "quantity": item.quantity,
+                        "unit_price": item.unit_price,
+                    }
+                )
+            orders_list.append(order_dict)
+        return orders_list
     
     def change_status(self, new_status, order_id):
             order = Order.query.get(order_id)
