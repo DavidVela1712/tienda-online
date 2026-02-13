@@ -22,9 +22,8 @@ class OrderService:
                 calculated_total += item.get("quantity") * item.get("price")
             if data.get("total") != calculated_total:
                 raise ValueError("Totales distintos")
-
             order = Order(
-                user_id=0,
+                user_id=data.get("user_id"),
                 status="pending",
                 total_amount=calculated_total,
             )
@@ -85,8 +84,13 @@ class OrderService:
                 )
             return order_dict
         
-    def get_orders(self):
-        orders = Order.query.all()
+    def get_orders(self, status=None):
+        if status and status not in status_list:
+            raise ValueError("Status incorrecto")
+        if status:
+            orders = Order.query.filter_by(status=status).all()
+        else:
+            orders = Order.query.all()
         orders_list = []
         for order in orders:
             order_dict = {

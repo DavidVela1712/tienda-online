@@ -39,7 +39,8 @@ def get_order(order_id):
 @orders_bp.route("/", methods=["GET"])
 def get_all_orders():
     try:
-        orders = order_service.get_orders()
+        status = request.args.get("status")
+        orders = order_service.get_orders(status)
         return jsonify(orders), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
