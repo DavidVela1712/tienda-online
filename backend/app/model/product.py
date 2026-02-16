@@ -7,6 +7,6 @@ class Product(db.Model):
     descripcion = db.Column(db.String(100))
     imagen = db.Column(db.String(20))
     categoria_id = db.Column(db.Integer)
-    precio = db.Column(db.Float)
+    price = db.Column(db.Float)
     stock = db.Column(db.Integer)
     activo = db.Column(db.String(20), default="activo")
