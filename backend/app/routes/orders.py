@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.order_service import OrderService
+from app.model.user import User
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 orders_bp = Blueprint("orders", __name__, url_prefix="/api/orders")
 
@@ -37,8 +39,13 @@ def get_order(order_id):
         return jsonify({"error": str(e)}), 404
 
 @orders_bp.route("/", methods=["GET"])
+@jwt_required()
 def get_all_orders():
     try:
+        user_id = get_jwt_identity()
+        claims = get_jwt()
+
+        current_user = User.query.get(user_id)
         status = request.args.get("status")
         orders = order_service.get_orders(status)
         return jsonify(orders), 200
