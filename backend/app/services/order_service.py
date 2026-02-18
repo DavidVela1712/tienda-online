@@ -1,5 +1,3 @@
-from datetime import datetime
-import uuid
 from app.extensions import db
 
 from app.model.order import Order, OrderItem
@@ -17,15 +15,12 @@ class OrderService:
         if isinstance(items, list) and items != []:
             products_to_update = []
             for item in items:
-                if (
-                    item.get("product_id") is None
-                    or item.get("quantity") is None
-                ):
+                if item.get("product_id") is None or item.get("quantity") is None:
                     raise ValueError("Valores no esperados")
-                
+
                 if item.get("quantity") <= 0:
                     raise ValueError("Cantidad inválida")
-                
+
                 product = Product.query.get(item.get("product_id"))
                 if not product:
                     raise ValueError("Producto no encontrado")
@@ -34,7 +29,7 @@ class OrderService:
                     raise ValueError("Stock insuficiente")
                 products_to_update.append((product, item.get("quantity")))
                 calculated_total += item.get("quantity") * product.price
-            
+
             order = Order(
                 user_id=data.get("user_id"),
                 status="pending",
@@ -54,7 +49,7 @@ class OrderService:
                 )
                 db.session.add(order_item)
                 order_items_list.append(order_item)
-                
+
             db.session.commit()
 
             order_dict = {
@@ -100,13 +95,19 @@ class OrderService:
                 )
             return order_dict
 
-    def get_orders(self, status=None):
+    def get_orders(self, current_user, status=None):
         if status and status not in status_list:
             raise ValueError("Status incorrecto")
+        
+        query = Order.query
+
+        if current_user.role != "admin":
+            query = query.filter_by(user=current_user.id)
+        
         if status:
-            orders = Order.query.filter_by(status=status).all()
-        else:
-            orders = Order.query.all()
+            query = query.filter_by(status=status)
+
+        orders = query.all()
         orders_list = []
         for order in orders:
             order_dict = {
