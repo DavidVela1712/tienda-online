@@ -98,12 +98,12 @@ class OrderService:
     def get_orders(self, current_user, status=None):
         if status and status not in status_list:
             raise ValueError("Status incorrecto")
-        
+
         query = Order.query
 
         if current_user.role != "admin":
             query = query.filter_by(user=current_user.id)
-        
+
         if status:
             query = query.filter_by(status=status)
 
@@ -129,14 +129,17 @@ class OrderService:
             orders_list.append(order_dict)
         return orders_list
 
-    def change_status(self, new_status, order_id):
+    def change_status(self, current_user, new_status, order_id):
         order = Order.query.get(order_id)
         if not order:
             raise ValueError("Pedido no encontrado")
+        if new_status not in status_list:
+            raise ValueError("Status incorrecto")
+        if current_user.role != "admin":
+            if order.user_id != current_user.id:
+                raise ValueError("Acceso denegado")
         else:
-            if new_status not in status_list:
-                raise ValueError("Status incorrecto")
-            elif order.status in ["pending", "paid"] and new_status == "cancelled":
+            if order.status in ["pending", "paid"] and new_status == "cancelled":
                 for item in order.items:
                     product = Product.query.get(item.product_id)
                     product.stock += item.quantity
@@ -149,5 +152,5 @@ class OrderService:
                 order.status = new_status
             else:
                 raise ValueError("No se puede modificar ese Status")
-            db.session.commit()
-            return order
+        db.session.commit()
+        return order

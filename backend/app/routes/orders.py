@@ -43,16 +43,15 @@ def get_order(order_id):
 def get_all_orders():
     try:
         user_id = get_jwt_identity()
-        claims = get_jwt()
-
         current_user = User.query.get(user_id)
         status = request.args.get("status")
-        orders = order_service.get_orders(status)
+        orders = order_service.get_orders(current_user, status)
         return jsonify(orders), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     
-@orders_bp.route("/<int:order_id>", methods=["PATCH"])
+@orders_bp.route("/<int:order_id>/status", methods=["PATCH"])
+@jwt_required()
 def change_order(order_id):
     try:
         new_order = request.get_json(silent=True)
@@ -60,7 +59,9 @@ def change_order(order_id):
             return jsonify({"error": "Status vacío o no es JSON"}), 400
         if not isinstance(new_order.get("status"), str) or new_order.get("status") is None:
             return jsonify({"error": "Valor de status incorrecto"}), 400
-        order = order_service.change_status(new_order.get("status"), order_id)
+        user_id = get_jwt_identity()
+        current_user = User.query.get(user_id)
+        order = order_service.change_status(current_user, new_order.get("status"), order_id)
         return jsonify(order), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
